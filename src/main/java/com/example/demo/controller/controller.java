@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin(origins = "http://localhost:3000")
 public class controller {
     
-    @GetMapping("/api/hello")
+    @GetMapping("/")
     public String sayHello() {
         return "Bonjour depuis le Backend Java de Rached !"; // message affiché 
     }
