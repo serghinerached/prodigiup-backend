@@ -10,6 +10,6 @@ public class Controller {
     
     @GetMapping("/api/hello")
     public String sayHello() {
-        return "Bonjour depuis le Backend Java de Rached !"; // message affiché 
+        return "Connexion Render/Backend/Java : OK !"; // message affiché 
     }
 }
