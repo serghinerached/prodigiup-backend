@@ -10,6 +10,6 @@ public class Controller {
     
     @GetMapping("/api/hello")
     public String sayHello() {
-        return "Connexion Render/Backend/Java = OK 2 !"; // message affiché 
+        return "Connexion Render/Backend/Java = OK !"; // message affiché 
     }
 }
