@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import org.springframework.lang.Nullable;
@@ -12,40 +13,47 @@ public class Incident {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Nullable
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String number;
-    private Date opened;
-    @Column(name="assigned_to")
-    private String assignedTo;
-    private String state;
-    @Column(name="assignement_group")
-    private String assignementGroup;
-    @Column(name="requested_for")
-    private String requestedfor;
-    private Date resolved;
-    private Date closed;
-    private String service;
-    @Column(name="reopen_count")
-    private Integer reopencount;
 
+    private LocalDateTime opened;
+
+    @Column(name = "assigned_to")
+    private String assignedTo;
+
+    @Column(nullable = false)
+    private String state;
+
+    @Column(name = "assignment_group", nullable = false)
+    private String assignmentGroup;
+
+    @Column(name = "requested_for", nullable = false)
+    private String requestedFor;
+
+    private LocalDateTime resolved;
+    private LocalDateTime closed;
+
+    private String service;
+
+    @Column(name = "reopen_count")
+    private Integer reopenCount;
 
     public Incident() {}
 
-    public Incident(String number, Date opened, String assignedTo, String state, String assignementGroup, String requestedfor, 
-        Date resolved, Date closed, String service, Integer reopencount) {
+    public Incident(String number, LocalDateTime opened, String assignedTo, String state, String assignmentGroup, String requestedFor, 
+        LocalDateTime resolved, LocalDateTime closed, String service, Integer reopenCount) {
         this.number = number;
         this.opened = opened;
         this.assignedTo = assignedTo;
         this.state = state;
-        this.assignementGroup = assignementGroup;
-        this.requestedfor = requestedfor;
+        this.assignmentGroup = assignmentGroup;
+        this.requestedFor = requestedFor;
         this.resolved = resolved;
         this.closed = closed;       
         this.service = service;
-        this.reopencount = reopencount;
+        this.reopenCount = reopenCount;
     }
   
 
@@ -59,7 +67,7 @@ public class Incident {
         return number;
     }
 
-     public Date getOpened() {
+     public LocalDateTime getOpened() {
         return opened;
     }
 
@@ -70,17 +78,17 @@ public class Incident {
         return state;
     }
 
-    public String getAssignementGroup() {
-        return assignementGroup;
+    public String getAssignmentGroup() {
+        return assignmentGroup;
     }
 
     public String getRequestedfor() {
-        return requestedfor;
+        return requestedFor;
     }   
-    public Date getResolved() {
+    public LocalDateTime getResolved() {
         return resolved;
     }
-    public Date getClosed() {
+    public LocalDateTime getClosed() {
         return closed;
     }
 
@@ -88,7 +96,7 @@ public class Incident {
         return service;
     }
     public Integer getReopencount() {
-        return reopencount;
+        return reopenCount;
     }
 
     // setters-----------------------
@@ -97,7 +105,7 @@ public class Incident {
         this.number = number;
     }
 
-     public void setOpened(Date opened) {
+     public void setOpened(LocalDateTime opened) {
         this.opened = opened;
     }
 
@@ -107,22 +115,22 @@ public class Incident {
     public void setState(String state) {
         this.state = state;
     }
-    public void setAssignementGroup(String assignementGroup) {
-        this.assignementGroup = assignementGroup;
+    public void setAssignmentGroup(String assignmentGroup) {
+        this.assignmentGroup = assignmentGroup;
     }
-    public void setRequestedfor(String requestedfor) {
-        this.requestedfor = requestedfor;
+    public void setRequestedFor(String requestedFor) {
+        this.requestedFor = requestedFor;
     }
-    public void setResolved(Date resolved) {
+    public void setResolved(LocalDateTime resolved) {
         this.resolved = resolved;
     }
-    public void setClosed(Date closed) {
+    public void setClosed(LocalDateTime closed) {
         this.closed = closed;
     }
     public void setService(String service) {
         this.service = service;
     }
-    public void setReopencount(Integer reopencount) {
-        this.reopencount = reopencount;
+    public void setReopenCount(Integer reopenCount) {
+        this.reopenCount = reopenCount;
     }
 }
