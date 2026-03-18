@@ -1,7 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 import org.springframework.lang.Nullable;
 
 @Entity
@@ -10,25 +10,21 @@ public class Performance1 {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Nullable
     private Long id;
-
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String number;
     private String service;
-    private Date opened;
-    private Date resolved;
-    private int mttr8days;
-
+    private LocalDateTime opened;
+    private LocalDateTime resolved;
+    private Integer mttr8days;
 
     public Performance1() {}
 
-    public Performance1(String number, Date opened, Date resolved, int mttr8days, String service) {
-         this.service = service;
+    public Performance1(String number,String service,LocalDateTime opened,LocalDateTime resolved, Integer mttr8days) {
         this.number = number;
-        this.service = service;
         this.opened = opened;
         this.resolved = resolved;
+        this.service = service;
         this.mttr8days = mttr8days;
     }
   
@@ -42,20 +38,24 @@ public class Performance1 {
     public String getNumber() {
         return number;
     }
-    public String getService() {
+
+     public String getService() {
         return service;
     }
-     public Date getOpened() {
+
+     public LocalDateTime getOpened() {
         return opened;
     }
 
-    public Date getResolved() {
+    
+    public LocalDateTime getResolved() {
         return resolved;
     }
-    public int getMttr8days() {
+   
+    public Integer getMttr8days() {
         return mttr8days;
     }
- 
+
     // setters-----------------------
 
     public void setNumber(String number) {
@@ -63,15 +63,18 @@ public class Performance1 {
     }
 
     public void setService(String service) {
-        this.service = service; 
+        this.service = service;
     }
-     public void setOpened(Date opened) {
+
+    public void setOpened(LocalDateTime opened) {
         this.opened = opened;
     }
-    public void setResolved(Date resolved) {
+
+    public void setResolved(LocalDateTime resolved) {
         this.resolved = resolved;
     }
-    public void setMttr8days(int mttr8days) {
+  
+    public void setMttr8days(Integer mttr8days) {
         this.mttr8days = mttr8days;
     }
 }

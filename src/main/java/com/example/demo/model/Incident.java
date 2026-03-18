@@ -1,10 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
-import java.util.Date;
-
 import org.springframework.lang.Nullable;
 
 @Entity

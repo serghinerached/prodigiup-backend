@@ -10,9 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.poi.ss.usermodel.*;
 
-
 @RestController
-@RequestMapping("/api/performance1")
+@RequestMapping("/api/performance1s")
 @CrossOrigin(origins = "*")
 public class Performance1Controller {
 
@@ -22,99 +21,78 @@ public class Performance1Controller {
         this.repository = repository;
     }
 
-    // GET all Performance1s
+    // GET all performance1s
     @GetMapping
     public List<Performance1> getAllPerformance1s() {
         return repository.findAll();
     }
 
-    // CREATE Performance1
+    // CREATE performance1
     @PostMapping
-    public Performance1 createPerformance1(@RequestBody @NonNull Performance1 Performance1) {
-        return repository.save(Performance1);
+    public Performance1 createPerformance1(@RequestBody @NonNull Performance1 performance1) {
+        return repository.save(performance1);
     }
 
-    // GET Performance1 by id
+    // GET performance1 by id
     @GetMapping("/{id}")
-    public Performance1 getPerformance1(@PathVariable  @NonNull Long id) {
+    public Performance1 getPerformance1(@PathVariable @NonNull Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Performance1 not found"));
     }
 
-    // DELETE Performance1
+    // DELETE performance1
     @DeleteMapping("/{id}")
-    public void deletePerformance1(@PathVariable  @NonNull Long id) {
+    public void deletePerformance1(@PathVariable @NonNull Long id) {
         repository.deleteById(id);
     }
 
-   //--------------------------------------------
-    
-   @PostMapping("/import-excel")
+    // IMPORT EXCEL
+    @PostMapping("/import-excel")
     public String importExcel(@RequestParam("file") MultipartFile file) {
 
         try (InputStream inp = file.getInputStream()) {
 
-            // vider la table
             repository.deleteAllInBatch();
-            repository.resetIdSequence();
 
             Workbook workbook = WorkbookFactory.create(inp);
             Sheet sheet = workbook.getSheetAt(0);
 
             DataFormatter formatter = new DataFormatter();
-
-            List<Performance1> Performance1s = new ArrayList<>();
+            List<Performance1> performance1s = new ArrayList<>();
 
             for (Row row : sheet) {
 
-                if (row.getRowNum() == 0) continue; // ignorer header
-
+                if (row.getRowNum() == 0) continue;
                 String number = formatter.formatCellValue(row.getCell(0));
-                if (number == null || number.trim().isEmpty()) {
-                    continue; // ignorer ligne vide
-                }
+                if (number == null || number.trim().isEmpty()) continue;
+                Performance1 performance1 = new Performance1();
+                performance1.setNumber(number.trim());
 
-                Performance1 Performance1 = new Performance1();
-                Performance1.setNumber(number.trim());
-
-                // SERVICE
-                String cell1 = formatter.formatCellValue(row.getCell(1));
-                Performance1.setService(cell1.trim());
+                performance1.setService(formatter.formatCellValue(row.getCell(11)));
 
                 // OPENED
-                Cell cell2 = row.getCell(2);
-                if (cell2 != null && cell2.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell2)) {
-                    Performance1.setOpened(cell2.getDateCellValue());
+                Cell c1 = row.getCell(1);
+                if (c1 != null && c1.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(c1)) {
+                    performance1.setOpened(c1.getLocalDateTimeCellValue());
                 }
 
                 // RESOLVED
-                Cell cell3 = row.getCell(3);
-                if (cell3 != null && cell3.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell3)) {
-                    Performance1.setResolved(cell3.getDateCellValue());
+                Cell c7 = row.getCell(9);
+                if (c7 != null && c7.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(c7)) {
+                    performance1.setResolved(c7.getLocalDateTimeCellValue());
                 }
 
-                // MTTR 8 DAYS
-                Cell cell4 = row.getCell(4);
-                if (cell4 != null && cell4.getCellType() == CellType.NUMERIC) {
-                    Performance1.setMttr8days((int) cell4.getNumericCellValue());
-                }
-                
-
-                Performance1s.add(Performance1);
+                performance1s.add(performance1);
             }
 
             workbook.close();
+            repository.saveAll(performance1s);
 
-            // insertion batch (beaucoup plus rapide)
-            repository.saveAll(Performance1s);
-
-            return Performance1s.size() + " Performance1s importés";
+            return performance1s.size() + " performance1s importés";
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "Erreur lors de l'import : " + e.getMessage();
+            return "Erreur import: " + e.getMessage();
         }
     }
-
-
 }
