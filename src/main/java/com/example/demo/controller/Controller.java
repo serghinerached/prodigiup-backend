@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin(origins = "*")
 public class Controller {
     
-    @GetMapping("/api/hello")
+    @GetMapping("/api/hello") // message d'accueil de connexion au backend.
     public String sayHello() {
         return "Connexion Render/Backend/Java = OK !"; // message affiché 
     }
