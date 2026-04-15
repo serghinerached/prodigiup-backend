@@ -46,6 +46,30 @@ public class Performance1Controller {
         repository.deleteById(id);
     }
 
+    private double calculateMttr8Days(java.time.LocalDateTime opened, java.time.LocalDateTime resolved) {
+
+        if (opened == null || resolved == null) return 0;
+
+        double totalDays = 0;
+        java.time.LocalDateTime current = opened;
+
+        while (current.isBefore(resolved)) {
+
+            java.time.DayOfWeek day = current.getDayOfWeek();
+
+            if (day != java.time.DayOfWeek.SATURDAY && day != java.time.DayOfWeek.SUNDAY) {
+                java.time.LocalDateTime endOfDay = current.withHour(23).withMinute(59).withSecond(59);
+                java.time.LocalDateTime segmentEnd = resolved.isBefore(endOfDay) ? resolved : endOfDay;
+
+                totalDays += java.time.Duration.between(current, segmentEnd).toMillis() / (1000.0 * 60 * 60 * 24);
+            }
+
+            current = current.plusDays(1).withHour(0).withMinute(0).withSecond(0);
+        }
+
+        return Math.round(totalDays * 100.0) / 100.0;
+    }
+
     // IMPORT EXCEL
     @PostMapping("/import-excel")
     public String importExcel(@RequestParam("file") MultipartFile file) {
@@ -82,8 +106,16 @@ public class Performance1Controller {
                     performance1.setResolved(c7.getLocalDateTimeCellValue());
                 }
 
-                performance1s.add(performance1);
-            }
+                // 🔥 CALCUL MTTR
+                if (performance1.getOpened() != null && performance1.getResolved() != null) {
+                    double mttr = calculateMttr8Days(
+                        performance1.getOpened(),
+                        performance1.getResolved()
+                    );
+                    performance1.setMttr8days(mttr);
+                }
+
+                performance1s.add(performance1);            }
 
             workbook.close();
             repository.saveAll(performance1s);

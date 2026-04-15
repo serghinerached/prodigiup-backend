@@ -16,11 +16,13 @@ public class Performance1 {
     private String service;
     private LocalDateTime opened;
     private LocalDateTime resolved;
-    private Integer mttr8days;
+    @Column(name = "mttr8days")
+    private Double mttr8days;
+
 
     public Performance1() {}
 
-    public Performance1(String number,String service,LocalDateTime opened,LocalDateTime resolved, Integer mttr8days) {
+    public Performance1(String number,String service,LocalDateTime opened,LocalDateTime resolved, Double mttr8days) {
         this.number = number;
         this.opened = opened;
         this.resolved = resolved;
@@ -52,7 +54,7 @@ public class Performance1 {
         return resolved;
     }
    
-    public Integer getMttr8days() {
+    public double getMttr8days() {
         return mttr8days;
     }
 
@@ -74,7 +76,7 @@ public class Performance1 {
         this.resolved = resolved;
     }
   
-    public void setMttr8days(Integer mttr8days) {
+    public void setMttr8days(double mttr8days) {
         this.mttr8days = mttr8days;
     }
 }
