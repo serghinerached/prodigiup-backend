@@ -46,6 +46,7 @@ public class Performance1Controller {
         repository.deleteById(id);
     }
 
+    // CALCUL MTTR8DAYS
     private double calculateMttr8Days(java.time.LocalDateTime opened, java.time.LocalDateTime resolved) {
 
         if (opened == null || resolved == null) return 0;
@@ -106,7 +107,7 @@ public class Performance1Controller {
                     performance1.setResolved(c7.getLocalDateTimeCellValue());
                 }
 
-                // 🔥 CALCUL MTTR
+                // 🔥 AJOUT ICI
                 if (performance1.getOpened() != null && performance1.getResolved() != null) {
                     double mttr = calculateMttr8Days(
                         performance1.getOpened(),
