@@ -108,13 +108,13 @@ public class Performance1Controller {
                 }
 
                 // 🔥 AJOUT ICI
-                if (performance1.getOpened() != null && performance1.getResolved() != null) {
+            //    if (performance1.getOpened() != null && performance1.getResolved() != null) {
                     double mttr = calculateMttr8Days(
                         performance1.getOpened(),
                         performance1.getResolved()
                     );
                     performance1.setMttr8days(mttr);
-                }
+            //    }
 
                 performance1s.add(performance1);            }
 
