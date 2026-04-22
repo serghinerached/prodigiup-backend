@@ -5,44 +5,62 @@ import java.time.LocalDateTime;
 import org.springframework.lang.Nullable;
 
 @Entity
-@Table(name = "incidents")
-public class Incident {
+@Table(name = "tracker") 
+
+public class tracker {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "week")
+    private Integer week;
+
+    @Column(name = "opened")
+    private LocalDateTime opened;
+
+    @Column(name = "number")
     private String number;
 
-    private LocalDateTime opened;
+    @Column(name = "type")
+    private String type;
 
     @Column(name = "assigned_to")
     private String assignedTo;
 
-    @Column(nullable = false)
+    @Column(name = "state")
     private String state;
 
-    @Column(name = "assignment_group", nullable = false)
+    @Column(name = "assignment_group")
     private String assignmentGroup;
 
-    @Column(name = "requested_for", nullable = false)
+    @Column(name = "requested_for")
     private String requestedFor;
 
+    @Column(name = "resolved")
     private LocalDateTime resolved;
+
+    @Column(name = "closed")
     private LocalDateTime closed;
 
+    @Column(name = "service")
     private String service;
 
     @Column(name = "reopen_count")
     private Integer reopenCount;
 
-    public Incident() {}
+    @Column(name = "mttr")
+    private double mttr;
 
-    public Incident(String number, LocalDateTime opened, String assignedTo, String state, String assignmentGroup, String requestedFor, 
-        LocalDateTime resolved, LocalDateTime closed, String service, Integer reopenCount) {
-        this.number = number;
+
+    public tracker() {}
+
+    public tracker(Integer week, LocalDateTime opened, String number,String type, String assignedTo, String state, String assignmentGroup, String requestedFor, 
+        LocalDateTime resolved, LocalDateTime closed, String service, Integer reopenCount, double mttr) {
+        this.week = week;
         this.opened = opened;
+        this.number = number;
+        this.type = type;
         this.assignedTo = assignedTo;
         this.state = state;
         this.assignmentGroup = assignmentGroup;
@@ -51,6 +69,7 @@ public class Incident {
         this.closed = closed;       
         this.service = service;
         this.reopenCount = reopenCount;
+        this.mttr = mttr;
     }
   
 
@@ -60,12 +79,20 @@ public class Incident {
         return id;
     }
 
+    public Integer getWeek() {
+        return week;
+    }
+
+    public LocalDateTime getOpened() {
+        return opened;
+    }
+
     public String getNumber() {
         return number;
     }
 
-     public LocalDateTime getOpened() {
-        return opened;
+    public String getType() {
+        return type;
     }
 
      public String getAssignedTo() {
@@ -79,7 +106,7 @@ public class Incident {
         return assignmentGroup;
     }
 
-    public String getRequestedfor() {
+    public String getRequestedFor() {
         return requestedFor;
     }   
     public LocalDateTime getResolved() {
@@ -96,14 +123,26 @@ public class Incident {
         return reopenCount;
     }
 
+    public double getMttr() {
+        return mttr;
+    }
+
     // setters-----------------------
+
+    public void setWeek(Integer week) {
+        this.week = week;
+    }
+
+    public void setOpened(LocalDateTime opened) {
+        this.opened = opened;
+    }
 
     public void setNumber(String number) {
         this.number = number;
     }
 
-     public void setOpened(LocalDateTime opened) {
-        this.opened = opened;
+    public void setType(String type) {
+        this.type = type;
     }
 
      public void setAssignedTo(String assignedTo) {
@@ -129,5 +168,8 @@ public class Incident {
     }
     public void setReopenCount(Integer reopenCount) {
         this.reopenCount = reopenCount;
+    }
+    public void setMttr(double mttr) {
+        this.mttr = mttr;
     }
 }

@@ -1,9 +1,9 @@
 package com.example.demo.repository;
 
-import com.example.demo.model.Performance1;
+import com.example.demo.model.tracker;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface Performance1Repository extends JpaRepository<Performance1, Long> {
+public interface TrackerRepository extends JpaRepository<tracker, Long> {
 }
