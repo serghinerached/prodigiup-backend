@@ -14,8 +14,14 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://serghinerached.github.io") // ton frontend GitHub Pages
-                        .allowedMethods("*");
+                        .allowedOrigins(
+                                "http://localhost:3000",
+                                "https://serghinerached.github.io",
+                                "https://prodigiup-frontend.onrender.com"
+                        )
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }
