@@ -14,7 +14,7 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.*;
 
 @RestController
-@RequestMapping("/api/incidents")
+@RequestMapping("/api/tracker")
 @CrossOrigin(origins = "*")
 public class TrackerController {
 
@@ -24,28 +24,28 @@ public class TrackerController {
         this.repository = repository;
     }
 
-    // GET all incidents
+    // GET all tracker
     @GetMapping
-    public List<tracker> getAllIncidents() {
+    public List<tracker> getAllTracker() {
         return repository.findAll();
     }
 
-    // CREATE incident
+    // CREATE tracker
     @PostMapping
-    public tracker createIncident(@RequestBody @NonNull tracker incident) {
-        return repository.save(incident);
+    public tracker createTracker(@RequestBody @NonNull tracker tracker) {
+        return repository.save(tracker);
     }
 
-    // GET incident by id
+    // GET tracker by id
     @GetMapping("/{id}")
-    public tracker getIncident(@PathVariable @NonNull Long id) {
+    public tracker getTracker(@PathVariable @NonNull Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Incident not found"));
+                .orElseThrow(() -> new RuntimeException("tracker not found"));
     }
 
-    // DELETE incident
+    // DELETE tracker
     @DeleteMapping("/{id}")
-    public void deleteIncident(@PathVariable @NonNull Long id) {
+    public void deleteTracker(@PathVariable @NonNull Long id) {
         repository.deleteById(id);
     }
 
@@ -77,61 +77,61 @@ public class TrackerController {
             Sheet sheet = workbook.getSheetAt(0);
 
             DataFormatter formatter = new DataFormatter();
-            List<tracker> incidents = new ArrayList<>();
+            List<tracker> trackerList = new ArrayList<>();
 
             for (Row row : sheet) { // FEUILLE et COLONNES EXCEL
 
                 if (row.getRowNum() == 0) continue;
 
-                // creation objet incident
-                tracker incident = new tracker();
+                // creation objet tracker
+                tracker tracker = new tracker();
 
                 // col 1 = number
-                incident.setNumber(formatter.formatCellValue(row.getCell(0)));
+                tracker.setNumber(formatter.formatCellValue(row.getCell(0)));
 
                 // col 1 = week
-            //    incident.setWeek(getIntCellValue(row.getCell(0)));
+            //    tracker.setWeek(getIntCellValue(row.getCell(0)));
 
                 // col 2 = opened
                 Cell cellOpened = row.getCell(1);
                 if (cellOpened != null && cellOpened.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cellOpened)) {
-                    incident.setOpened(cellOpened.getLocalDateTimeCellValue());
+                    tracker.setOpened(cellOpened.getLocalDateTimeCellValue());
                 }
   
                 // col 3 = assigned to
-                incident.setAssignedTo(formatter.formatCellValue(row.getCell(2)));
+                tracker.setAssignedTo(formatter.formatCellValue(row.getCell(2)));
                 // col 4 = state
-                incident.setState(formatter.formatCellValue(row.getCell(3)));
+                tracker.setState(formatter.formatCellValue(row.getCell(3)));
                 // col 6 = assignment group
-                incident.setAssignmentGroup(formatter.formatCellValue(row.getCell(5)));
+                tracker.setAssignmentGroup(formatter.formatCellValue(row.getCell(5)));
                 // col 8 = requested for
-                incident.setRequestedFor(formatter.formatCellValue(row.getCell(6)));
+                tracker.setRequestedFor(formatter.formatCellValue(row.getCell(6)));
 
                 // col 10 = resolved
                 Cell cellResolved = row.getCell(9);
                 if (cellResolved != null && cellResolved.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cellResolved)) {
-                    incident.setResolved(cellResolved.getLocalDateTimeCellValue());
+                    tracker.setResolved(cellResolved.getLocalDateTimeCellValue());
                 }
 
                 // col 11 = closed
                 Cell cellClosed = row.getCell(10);
                 if (cellClosed != null && cellClosed.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cellClosed)) {
-                    incident.setClosed(cellClosed.getLocalDateTimeCellValue());
+                    tracker.setClosed(cellClosed.getLocalDateTimeCellValue());
                 }
 
                 //col 12 = service
-                incident.setService(formatter.formatCellValue(row.getCell(11)));
+                tracker.setService(formatter.formatCellValue(row.getCell(11)));
                 // col 14 = reopen count
-                incident.setReopenCount(getIntCellValue(row.getCell(13)));
+                tracker.setReopenCount(getIntCellValue(row.getCell(13)));
 
-                // AJOUT OBJET incident à la liste
-                incidents.add(incident);
+                // AJOUT OBJET tracker à la liste
+                trackerList.add(tracker);
             }
 
             workbook.close();
-            repository.saveAll(incidents);
+            repository.saveAll(trackerList);
 
-            return incidents.size() + " incidents importés";
+            return trackerList.size() + " tracker importés";
 
         } catch (Exception e) {
             e.printStackTrace();
