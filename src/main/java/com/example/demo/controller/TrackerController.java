@@ -88,7 +88,6 @@ public class TrackerController {
 
                 // col 1 = number
                 tracker.setNumber(formatter.formatCellValue(row.getCell(0)));
-                System.err.println("Number: " + row.getCell(0).toString());
 
                 // col 1 = week
             //    tracker.setWeek(getIntCellValue(row.getCell(0)));
@@ -98,7 +97,6 @@ public class TrackerController {
                 if (cellOpened != null && cellOpened.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cellOpened)) {
                     tracker.setOpened(cellOpened.getLocalDateTimeCellValue());
                 }
-                System.err.println("Opened: " + row.getCell(1).toString());
   
                 // col 3 = assigned to
                 tracker.setAssignedTo(formatter.formatCellValue(row.getCell(2)));
@@ -114,14 +112,12 @@ public class TrackerController {
                 if (cellResolved != null && cellResolved.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cellResolved)) {
                     tracker.setResolved(cellResolved.getLocalDateTimeCellValue());
                 }
-                System.err.println("Resolved: " + row.getCell(9).toString());
 
                 // col 11 = closed
                 Cell cellClosed = row.getCell(10);
                 if (cellClosed != null && cellClosed.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cellClosed)) {
                     tracker.setClosed(cellClosed.getLocalDateTimeCellValue());
                 }
-                System.err.println("Closed: " + row.getCell(10).toString());
 
                 //col 12 = service
                 tracker.setService(formatter.formatCellValue(row.getCell(11)));

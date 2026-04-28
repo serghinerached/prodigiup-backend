@@ -1,3 +1,4 @@
+/*
 package com.example.demo.model;
 
 import jakarta.persistence.*;
@@ -171,5 +172,169 @@ public class tracker {
     }
     public void setMttr(double mttr) {
         this.mttr = mttr;
+    }
+}
+
+*/
+
+package com.example.demo.model;
+
+import jakarta.persistence.*;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
+
+@Entity
+@Table(name = "tracker")
+public class tracker {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "week")
+    private Integer week;
+
+    @Column(name = "opened")
+    private LocalDateTime opened;
+
+    @Column(name = "number")
+    private String number;
+
+    @Column(name = "type")
+    private String type;
+
+    @Column(name = "assigned_to")
+    private String assignedTo;
+
+    @Column(name = "state")
+    private String state;
+
+    @Column(name = "assignment_group")
+    private String assignmentGroup;
+
+    @Column(name = "requested_for")
+    private String requestedFor;
+
+    @Column(name = "resolved")
+    private LocalDateTime resolved;
+
+    @Column(name = "closed")
+    private LocalDateTime closed;
+
+    @Column(name = "service")
+    private String service;
+
+    @Column(name = "reopen_count")
+    private Integer reopenCount;
+
+    @Column(name = "mttr")
+    private Double mttr;
+
+    public tracker() {}
+
+    // ================= GETTERS =================
+
+    public Long getId() { return id; }
+    public Integer getWeek() { return week; }
+    public LocalDateTime getOpened() { return opened; }
+    public String getNumber() { return number; }
+    public String getType() { return type; }
+    public String getAssignedTo() { return assignedTo; }
+    public String getState() { return state; }
+    public String getAssignmentGroup() { return assignmentGroup; }
+    public String getRequestedFor() { return requestedFor; }
+    public LocalDateTime getResolved() { return resolved; }
+    public LocalDateTime getClosed() { return closed; }
+    public String getService() { return service; }
+    public Integer getReopenCount() { return reopenCount; }
+    public Double getMttr() { return mttr; }
+
+    // ================= SETTERS =================
+
+    public void setWeek(Integer week) {
+        this.week = week;
+    }
+
+    public void setOpened(LocalDateTime opened) {
+        this.opened = opened;
+        calculateMttr();
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+        calculateType();
+    }
+
+    public void setAssignedTo(String assignedTo) {
+        this.assignedTo = assignedTo;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public void setAssignmentGroup(String assignmentGroup) {
+        this.assignmentGroup = assignmentGroup;
+    }
+
+    public void setRequestedFor(String requestedFor) {
+        this.requestedFor = requestedFor;
+    }
+
+    public void setResolved(LocalDateTime resolved) {
+        this.resolved = resolved;
+        calculateMttr();
+    }
+
+    public void setClosed(LocalDateTime closed) {
+        this.closed = closed;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
+
+    public void setReopenCount(Integer reopenCount) {
+        this.reopenCount = reopenCount;
+    }
+
+    // ================= LOGIQUE METIER =================
+
+    // 🔹 TYPE auto
+    private void calculateType() {
+        if (this.number == null) return;
+
+        String lower = this.number.toLowerCase();
+
+        if (lower.contains("inc")) {
+            this.type = "Incident";
+        } else if (lower.contains("sctask")) {
+            this.type = "Request";
+        } else {
+            this.type = "Other";
+        }
+    }
+
+    // 🔹 MTTR en jours ouvrés (2 décimales)
+    private void calculateMttr() {
+        if (opened == null || resolved == null) return;
+
+        LocalDate start = opened.toLocalDate();
+        LocalDate end = resolved.toLocalDate();
+
+        long totalDays = ChronoUnit.DAYS.between(start, end);
+        long workingDays = 0;
+
+        for (int i = 0; i <= totalDays; i++) {
+            LocalDate date = start.plusDays(i);
+            DayOfWeek day = date.getDayOfWeek();
+
+            if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
+                workingDays++;
+            }
+        }
+
+        // conversion en double avec 2 décimales
+        this.mttr = Math.round(workingDays * 100.0) / 100.0;
     }
 }
