@@ -79,56 +79,64 @@ public class TrackerController {
             DataFormatter formatter = new DataFormatter();
             List<tracker> trackerList = new ArrayList<>();
 
-            for (Row row : sheet) { // FEUILLE et COLONNES EXCEL
+            for (Row row : sheet) {
 
                 if (row.getRowNum() == 0) continue;
 
-                // creation objet tracker
                 tracker tracker = new tracker();
 
-                // col 1 = number
-                tracker.setNumber(formatter.formatCellValue(row.getCell(0)));
+                // NUMBER
+                String number = formatter.formatCellValue(row.getCell(0));
+                tracker.setNumber(number);
 
-                // col 1 = week
-            //    tracker.setWeek(getIntCellValue(row.getCell(0)));
-
-                // col 2 = opened
+                // OPENED
                 Cell cellOpened = row.getCell(1);
-                if (cellOpened != null && cellOpened.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cellOpened)) {
-                    tracker.setOpened(cellOpened.getLocalDateTimeCellValue());
+                if (cellOpened != null) {
+                    if (cellOpened.getCellType() == CellType.NUMERIC) {
+                        tracker.setOpened(cellOpened.getLocalDateTimeCellValue());
+                    } else {
+                        System.out.println("Date invalide ligne " + row.getRowNum());
+                    }
                 }
-  
-                // col 3 = assigned to
+
+                // ASSIGNED TO
                 tracker.setAssignedTo(formatter.formatCellValue(row.getCell(2)));
-                // col 4 = state
+
+                // STATE
                 tracker.setState(formatter.formatCellValue(row.getCell(3)));
-                // col 6 = assignment group
+
+                // ASSIGNMENT GROUP
                 tracker.setAssignmentGroup(formatter.formatCellValue(row.getCell(5)));
-                // col 8 = requested for
+
+                // REQUESTED FOR
                 tracker.setRequestedFor(formatter.formatCellValue(row.getCell(7)));
 
-                // col 10 = resolved
+                // RESOLVED
                 Cell cellResolved = row.getCell(9);
-                if (cellResolved != null && cellResolved.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cellResolved)) {
+                if (cellResolved != null && DateUtil.isCellDateFormatted(cellResolved)) {
                     tracker.setResolved(cellResolved.getLocalDateTimeCellValue());
                 }
 
-                // col 11 = closed
+                // CLOSED
                 Cell cellClosed = row.getCell(10);
-                if (cellClosed != null && cellClosed.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cellClosed)) {
+                if (cellClosed != null && DateUtil.isCellDateFormatted(cellClosed)) {
                     tracker.setClosed(cellClosed.getLocalDateTimeCellValue());
                 }
 
-                //col 12 = service
+                // SERVICE
                 tracker.setService(formatter.formatCellValue(row.getCell(11)));
-                // col 14 = reopen count
+
+                // REOPEN COUNT
                 tracker.setReopenCount(getIntCellValue(row.getCell(13)));
 
-                // AJOUT OBJET tracker à la liste
+                // DEBUG (très utile 👇)
+                System.out.println("IMPORT -> number=" + number);
+
                 trackerList.add(tracker);
             }
 
             workbook.close();
+
             repository.saveAll(trackerList);
 
             return trackerList.size() + " tracker importés";

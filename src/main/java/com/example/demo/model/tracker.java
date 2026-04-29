@@ -182,6 +182,8 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.WeekFields;
+import java.util.Locale;
 
 @Entity
 @Table(name = "tracker")
@@ -257,6 +259,7 @@ public class tracker {
 
     public void setOpened(LocalDateTime opened) {
         this.opened = opened;
+        calculateWeek();   // 👈 AJOUT ICI
         calculateMttr();
     }
 
@@ -298,6 +301,25 @@ public class tracker {
         this.reopenCount = reopenCount;
     }
 
+    //----calcul week
+    private void calculateWeek() {
+        if (this.opened == null) return;
+
+        LocalDate date = this.opened.toLocalDate();
+
+        this.week = date.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+        System.out.println("DATE = " + opened + " | WEEK = " + this.week);
+    }
+
+    //-------------
+    @PrePersist
+    @PreUpdate
+    private void preSave() {
+        calculateWeek();
+        calculateType();
+        calculateMttr();
+    }
+
     // ================= LOGIQUE METIER =================
 
     // 🔹 TYPE auto
@@ -319,22 +341,27 @@ public class tracker {
     private void calculateMttr() {
         if (opened == null || resolved == null) return;
 
-        LocalDate start = opened.toLocalDate();
-        LocalDate end = resolved.toLocalDate();
+        LocalDateTime start = opened;
+        LocalDateTime end = resolved;
 
-        long totalDays = ChronoUnit.DAYS.between(start, end);
-        long workingDays = 0;
+        double hours = 0;
 
-        for (int i = 0; i <= totalDays; i++) {
-            LocalDate date = start.plusDays(i);
-            DayOfWeek day = date.getDayOfWeek();
+        LocalDateTime current = start;
+
+        while (current.isBefore(end)) {
+
+            DayOfWeek day = current.getDayOfWeek();
 
             if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
-                workingDays++;
+                hours++;
             }
+
+            current = current.plusHours(1);
         }
 
-        // conversion en double avec 2 décimales
-        this.mttr = Math.round(workingDays * 100.0) / 100.0;
+        // conversion en jours (8h ou 24h selon ton besoin)
+        double days = hours / 24.0;
+
+        this.mttr = Math.round(days * 100.0) / 100.0;
     }
 }
