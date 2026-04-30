@@ -185,6 +185,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
 import java.util.Locale;
 
+
 @Entity
 @Table(name = "tracker")
 public class tracker {
@@ -308,7 +309,6 @@ public class tracker {
         LocalDate date = this.opened.toLocalDate();
 
         this.week = date.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-        System.out.println("DATE = " + opened + " | WEEK = " + this.week);
     }
 
     //-------------
@@ -339,29 +339,28 @@ public class tracker {
 
     // 🔹 MTTR en jours ouvrés (2 décimales)
     private void calculateMttr() {
+       
         if (opened == null || resolved == null) return;
 
-        LocalDateTime start = opened;
-        LocalDateTime end = resolved;
+        double minutes = 0;
 
-        double hours = 0;
+        LocalDateTime current = opened;
 
-        LocalDateTime current = start;
-
-        while (current.isBefore(end)) {
+        while (current.isBefore(resolved)) {
 
             DayOfWeek day = current.getDayOfWeek();
 
             if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
-                hours++;
+                minutes++;
             }
 
-            current = current.plusHours(1);
+            current = current.plusMinutes(1);
         }
 
-        // conversion en jours (8h ou 24h selon ton besoin)
+        double hours = minutes / 60.0;
         double days = hours / 24.0;
 
         this.mttr = Math.round(days * 100.0) / 100.0;
+
     }
 }

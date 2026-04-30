@@ -129,15 +129,13 @@ public class TrackerController {
                 // REOPEN COUNT
                 tracker.setReopenCount(getIntCellValue(row.getCell(13)));
 
-                // DEBUG (très utile 👇)
-                System.out.println("IMPORT -> number=" + number);
-
                 trackerList.add(tracker);
+
             }
 
             workbook.close();
 
-            repository.saveAll(trackerList);
+            repository.saveAll(trackerList);            
 
             return trackerList.size() + " tracker importés";
 
@@ -145,5 +143,6 @@ public class TrackerController {
             e.printStackTrace();
             return "Erreur import: " + e.getMessage();
         }
+
     }
 }
