@@ -200,7 +200,7 @@ public class tracker {
     @Column(name = "opened")
     private LocalDateTime opened;
 
-    @Column(name = "number")
+    @Column(name = "number", unique = true)
     private String number;
 
     @Column(name = "type")

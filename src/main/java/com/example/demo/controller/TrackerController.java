@@ -66,37 +66,35 @@ public class TrackerController {
     }
 
     // IMPORT EXCEL
-    @PostMapping("/import-excel")
+   @PostMapping("/import-excel")
     public String importExcel(@RequestParam("file") MultipartFile file) {
 
-        try (InputStream inp = file.getInputStream()) {
+        try (InputStream inp = file.getInputStream();
+            Workbook workbook = WorkbookFactory.create(inp)) {
 
-            repository.deleteAllInBatch();
-
-            Workbook workbook = WorkbookFactory.create(inp);
             Sheet sheet = workbook.getSheetAt(0);
-
             DataFormatter formatter = new DataFormatter();
+
             List<tracker> trackerList = new ArrayList<>();
 
             for (Row row : sheet) {
 
                 if (row.getRowNum() == 0) continue;
 
-                tracker tracker = new tracker();
-
-                // NUMBER
+                // NUMBER (clé unique)
                 String number = formatter.formatCellValue(row.getCell(0));
+                if (number == null || number.isEmpty()) continue;
+
+                // 🔥 UPSERT
+                tracker tracker = repository.findByNumber(number)
+                        .orElse(new tracker());
+
                 tracker.setNumber(number);
 
                 // OPENED
                 Cell cellOpened = row.getCell(1);
-                if (cellOpened != null) {
-                    if (cellOpened.getCellType() == CellType.NUMERIC) {
-                        tracker.setOpened(cellOpened.getLocalDateTimeCellValue());
-                    } else {
-                        System.out.println("Date invalide ligne " + row.getRowNum());
-                    }
+                if (cellOpened != null && cellOpened.getCellType() == CellType.NUMERIC) {
+                    tracker.setOpened(cellOpened.getLocalDateTimeCellValue());
                 }
 
                 // ASSIGNED TO
@@ -130,19 +128,15 @@ public class TrackerController {
                 tracker.setReopenCount(getIntCellValue(row.getCell(13)));
 
                 trackerList.add(tracker);
-
             }
 
-            workbook.close();
+            repository.saveAll(trackerList);
 
-            repository.saveAll(trackerList);            
-
-            return trackerList.size() + " tracker importés";
+            return trackerList.size() + " tracker importés / mis à jour";
 
         } catch (Exception e) {
             e.printStackTrace();
             return "Erreur import: " + e.getMessage();
         }
-
     }
 }
