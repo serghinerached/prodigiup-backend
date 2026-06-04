@@ -332,6 +332,10 @@ public class tracker {
             this.type = "Incident";
         } else if (lower.contains("sctask")) {
             this.type = "Request";
+        } else if (lower.contains("kb")) {
+            this.type = "KB";
+        } else if (lower.contains("ritm")) {
+            this.type = "Package";
         } else {
             this.type = "Other";
         }
@@ -339,28 +343,36 @@ public class tracker {
 
     // 🔹 MTTR en jours ouvrés (2 décimales)
     private void calculateMttr() {
+
+        if (this.number == null) return;
+        String lower = this.number.toLowerCase();
        
-        if (opened == null || resolved == null) return;
+          if (lower.contains("inc")) {
+            if (opened == null || resolved == null) return;
 
-        double minutes = 0;
+            double minutes = 0;
 
-        LocalDateTime current = opened;
+            LocalDateTime current = opened;
 
-        while (current.isBefore(resolved)) {
+            while (current.isBefore(resolved)) {
 
-            DayOfWeek day = current.getDayOfWeek();
+                DayOfWeek day = current.getDayOfWeek();
 
-            if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
-                minutes++;
+                if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
+                    minutes++;
+                }
+
+                current = current.plusMinutes(1);
             }
 
-            current = current.plusMinutes(1);
-        }
+            double hours = minutes / 60.0;
+            double days = hours / 24.0;
 
-        double hours = minutes / 60.0;
-        double days = hours / 24.0;
+            this.mttr = Math.round(days * 100.0) / 100.0;
+        } else {
+            this.mttr = null;
+        }   
 
-        this.mttr = Math.round(days * 100.0) / 100.0;
 
     }
 }

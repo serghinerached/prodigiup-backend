@@ -65,9 +65,9 @@ public class TrackerController {
         }
     }
 
-    // IMPORT EXCEL
-   @PostMapping("/import-excel")
-    public String importExcel(@RequestParam("file") MultipartFile file) {
+    // IMPORT EXCEL INCIDENTS
+   @PostMapping("/import-excel-incidents")
+    public String importExcelIncidents(@RequestParam("file") MultipartFile file) {
 
         try (InputStream inp = file.getInputStream();
             Workbook workbook = WorkbookFactory.create(inp)) {
@@ -132,11 +132,259 @@ public class TrackerController {
 
             repository.saveAll(trackerList);
 
-            return trackerList.size() + " tracker importés / mis à jour";
+            return trackerList.size() + " incidents importés / mis à jour";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erreur import: " + e.getMessage();
+        }
+    } // FIN IMPORT EXCEL INCIDENTS
+
+
+    //-----------------------------
+
+     // IMPORT EXCEL TASKS
+   @PostMapping("/import-excel-sctasks")
+    public String importExcelTasks(@RequestParam("file") MultipartFile file) {
+
+        try (InputStream inp = file.getInputStream();
+            Workbook workbook = WorkbookFactory.create(inp)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter();
+
+            List<tracker> trackerList = new ArrayList<>();
+
+            String typeItem = "";
+
+            for (Row row : sheet) {
+
+                if (row.getRowNum() == 0) continue;
+
+                String shortDescription = formatter.formatCellValue(row.getCell(5));
+                if(shortDescription.contains("APPL")){
+                    typeItem = "packaging"; // Skip this row
+                } else {
+                    typeItem = "request";
+                }
+
+                // NUMBER (clé unique) : sctask ou ritm
+                String number = "";
+                if(typeItem == "request") {
+                    number = formatter.formatCellValue(row.getCell(0));
+                } else if(typeItem == "packaging") {
+                    number = formatter.formatCellValue(row.getCell(1));
+                }
+                if (number == null || number.isEmpty()) continue;
+
+
+                // 🔥 UPSERT
+                tracker tracker = repository.findByNumber(number)
+                        .orElse(new tracker());
+
+                tracker.setNumber(number);
+
+                // OPENED
+                Cell cellOpened = row.getCell(2);
+                if (cellOpened != null && cellOpened.getCellType() == CellType.NUMERIC) {
+                    tracker.setOpened(cellOpened.getLocalDateTimeCellValue());
+                }
+
+                // ASSIGNED TO
+                tracker.setAssignedTo(formatter.formatCellValue(row.getCell(3)));
+
+                // STATE
+                tracker.setState(formatter.formatCellValue(row.getCell(4)));
+
+                //short desc -> SERVICE
+                String result = "";
+                String text = formatter.formatCellValue(row.getCell(5));
+
+                if(text == null) {
+                        result = text; // Fallback to the whole text if format is unexpected
+                } else {
+                    if(text.contains("Functional support request")) {
+                        result = "Visual Studio ::C2A";
+                    } else {
+                        if (text.contains("for") && text.contains("(")) {
+                            result = text.substring(
+                                text.indexOf("for") + 4,
+                                text.indexOf("(")
+                            ).trim();
+                        } else {
+                            if (text.contains("APPL")) {
+                                var start = text.indexOf(" ");
+                                var end = text.indexOf("(");
+
+                                if (start != -1 && end != -1) {
+                                    result = text.substring(start + 1, end).trim();
+                                }
+                            } else {
+                                result = text; // Fallback to the whole text if format is unexpected
+                            }
+                        }
+                    }
+                
+                }
+                tracker.setService(result);
+
+
+                // ASSIGNMENT GROUP
+                tracker.setAssignmentGroup(formatter.formatCellValue(row.getCell(6)));
+
+                // REQUESTED FOR
+                tracker.setRequestedFor(formatter.formatCellValue(row.getCell(8)));
+
+                // CLOSED
+                Cell cellClosed = row.getCell(9);
+                if (cellClosed != null && DateUtil.isCellDateFormatted(cellClosed)) {
+                    tracker.setResolved(cellClosed.getLocalDateTimeCellValue());
+                    tracker.setClosed(cellClosed.getLocalDateTimeCellValue());
+                }
+
+                trackerList.add(tracker);
+            }
+
+            repository.saveAll(trackerList);
+
+            return trackerList.size() + " stasks importés / mis à jour";
 
         } catch (Exception e) {
             e.printStackTrace();
             return "Erreur import: " + e.getMessage();
         }
     }
+
+    //-----------------------------
+
+    // IMPORT EXCEL KBS
+    @PostMapping("/import-excel-kbs")
+    public String importExcelKbs(@RequestParam("file") MultipartFile file) {
+
+        try (InputStream inp = file.getInputStream();
+            Workbook workbook = WorkbookFactory.create(inp)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter();
+
+            List<tracker> trackerList = new ArrayList<>();
+
+            for (Row row : sheet) {
+
+                if (row.getRowNum() == 0) continue;
+
+                // NUMBER (clé unique)
+                String number = formatter.formatCellValue(row.getCell(0));
+                if (number == null || number.isEmpty()) continue;
+
+                // 🔥 UPSERT
+                tracker tracker = repository.findByNumber(number)
+                        .orElse(new tracker());
+
+                tracker.setNumber(number);
+                
+                // OPENED
+                Cell cellOpened = row.getCell(2);
+                if (cellOpened != null && cellOpened.getCellType() == CellType.NUMERIC) {
+                    tracker.setOpened(cellOpened.getLocalDateTimeCellValue());
+                }
+                
+                // ASSIGNED TO
+                tracker.setAssignedTo(formatter.formatCellValue(row.getCell(3)));
+
+                // STATE
+                tracker.setState(formatter.formatCellValue(row.getCell(5)));
+
+                // SERVICE
+                tracker.setService(formatter.formatCellValue(row.getCell(4)));
+
+                // RESOLVED and CLOSED
+                Cell cellPublished = row.getCell(8);
+                System.out.println("Cell Published: " + cellPublished);
+                if (cellPublished != null && DateUtil.isCellDateFormatted(cellPublished)) {
+                    System.out.println("Cell Published is a date: " + cellPublished.getLocalDateTimeCellValue());
+                  tracker.setResolved(cellPublished.getLocalDateTimeCellValue());
+                  tracker.setClosed(cellPublished.getLocalDateTimeCellValue());
+
+                }
+
+                trackerList.add(tracker);
+            }
+
+            repository.saveAll(trackerList);
+
+            return trackerList.size() + " Kbs importés / mis à jour";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erreur import: " + e.getMessage();
+        }
+    }
+
+    //-----------------------------
+/*
+    // IMPORT EXCEL PACKAGES
+    @PostMapping("/import-excel-Packages")
+    public String importExcelPackages(@RequestParam("file") MultipartFile file) {
+
+        try (InputStream inp = file.getInputStream();
+            Workbook workbook = WorkbookFactory.create(inp)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter();
+
+            List<tracker> trackerList = new ArrayList<>();
+
+            for (Row row : sheet) {
+
+                if (row.getRowNum() == 0) continue;
+
+                // NUMBER (clé unique)
+                String number = formatter.formatCellValue(row.getCell(0));
+                if (number == null || number.isEmpty()) continue;
+
+                // 🔥 UPSERT
+                tracker tracker = repository.findByNumber(number)
+                        .orElse(new tracker());
+
+                tracker.setNumber(number);
+                
+                // OPENED
+                Cell cellOpened = row.getCell(2);
+                if (cellOpened != null && cellOpened.getCellType() == CellType.NUMERIC) {
+                    tracker.setOpened(cellOpened.getLocalDateTimeCellValue());
+                }
+                
+                // ASSIGNED TO
+                tracker.setAssignedTo(formatter.formatCellValue(row.getCell(3)));
+
+                // STATE
+                tracker.setState(formatter.formatCellValue(row.getCell(5)));
+
+                // SERVICE
+                tracker.setService(formatter.formatCellValue(row.getCell(4)));
+
+                // RESOLVED and CLOSED
+                Cell cellPublished = row.getCell(8);
+                System.out.println("Cell Published: " + cellPublished);
+                if (cellPublished != null && DateUtil.isCellDateFormatted(cellPublished)) {
+                    System.out.println("Cell Published is a date: " + cellPublished.getLocalDateTimeCellValue());
+                  tracker.setResolved(cellPublished.getLocalDateTimeCellValue());
+                  tracker.setClosed(cellPublished.getLocalDateTimeCellValue());
+
+                }
+
+                trackerList.add(tracker);
+            }
+
+            repository.saveAll(trackerList);
+
+            return trackerList.size() + " Kbs importés / mis à jour";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erreur import: " + e.getMessage();
+        }
+    }
+        */
 }
