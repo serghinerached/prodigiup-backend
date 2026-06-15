@@ -10,12 +10,11 @@ import java.util.Map;
 @RequestMapping("/api")
 public class UserController {
 
-    @GetMapping("/userprofile")
-    public Map<String, String> getUserProfile() {
+   @GetMapping("/current-user")
+    public Map<String, String> currentUser(Authentication authentication) {
 
         return Map.of(
-            "userProfile", String.valueOf(System.getenv("USERPROFILE")),
-            "userName", String.valueOf(System.getenv("USERNAME"))
+            "username", authentication.getName()
         );
     }
 }
